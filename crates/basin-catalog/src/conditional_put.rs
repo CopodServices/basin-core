@@ -1,12 +1,12 @@
 //! Emulated create-if-absent for object stores without conditional PUTs.
 //!
 //! The bucket-native catalog and lease registry commit by appending a
-//! monotonically versioned object with [`PutMode::Create`], which the AWS SDK
+//! monotonically versioned object with `PutMode::Create`, which the AWS SDK
 //! turns into `If-None-Match: *`. Backblaze B2 answers `501 Not Implemented` to
 //! that header, so the first DDL statement on a B2 bucket fails before anything
 //! is written, even though plain PUT, checksum and ACL headers all work.
 //!
-//! [`EmulatedConditionalPut`] wraps such a store and turns create-if-absent into
+//! EmulatedConditionalPut wraps such a store and turns create-if-absent into
 //! a HEAD, an unconditional PUT, and a read-back ETag check:
 //!
 //! - HEAD returns `AlreadyExists` when the object is there, which is exactly
@@ -55,7 +55,7 @@ fn parse_mode(raw: &str) -> Result<ConditionalPut, String> {
     }
 }
 
-/// Read [`CONDITIONAL_PUT_ENV`]. Unknown values are an error: this setting
+/// Read CONDITIONAL_PUT_ENV. Unknown values are an error: this setting
 /// decides whether a safety property is enforced by the store, so a typo must
 /// stop startup instead of silently changing behaviour.
 pub fn conditional_put_mode() -> Result<ConditionalPut, String> {
