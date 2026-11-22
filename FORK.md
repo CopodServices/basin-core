@@ -31,6 +31,19 @@ which is what the versioned-log protocol needs, and a single writer per project
 never races at all. Keep one writer per project on B2: one engine replica, and
 `BASIN_SHARD_ENABLED=1`.
 
+
+## Validating the emulation
+
+`crates/basin-catalog/tests/b2_emulated_create.rs` runs the wrapper against a
+live bucket and skips when the environment is unset:
+
+```bash
+BASIN_TEST_B2_ENDPOINT=https://s3.us-east-005.backblazeb2.com BASIN_TEST_B2_BUCKET=copod-database BASIN_TEST_B2_KEY_ID=... BASIN_TEST_B2_SECRET=...   cargo test -p basin-catalog --test b2_emulated_create
+```
+
+It asserts the first create succeeds, the second create is reported as
+`AlreadyExists`, and plain overwrites still pass through.
+
 ## Image
 
 `.github/workflows/image.yaml` builds `ghcr.io/copodservices/basin-core` on
