@@ -404,7 +404,21 @@ async fn run() -> Result<()> {
     // (`_catalog/`/`_leases/`) — NOT the page/disk-cached `Storage` wrapper
     // (which would serve stale cached pages and cannot CAS). `object_store` is
     // moved into `Storage` below, so clone the Arc now to keep a raw handle.
-    let catalog_object_store = object_store.clone();
+    //
+    // The catalog commits with PutMode::Create, which the AWS client turns
+    // into If-None-Match: *. Stores that do not implement the precondition
+    // (Backblaze B2 answers 501) get an emulated create-if-absent instead; see
+    // basin_catalog::conditional_put.
+    let (catalog_object_store, conditional_put) =
+        basin_catalog::catalog_store(object_store.clone())
+            .map_err(anyhow::Error::msg)
+            .context("BASIN_STORAGE_CONDITIONAL_PUT")?;
+    if conditional_put == basin_catalog::ConditionalPut::Emulated {
+        tracing::warn!(
+            target: "basin_server",
+            "catalog: create-if-absent emulated with HEAD + PUT + ETag check; keep one writer per project"
+        );
+    }
 
     // Production cache defaults: disk + page cache ON unless explicitly
     // disabled. Knobs (in priority order, highest wins):

@@ -35,6 +35,9 @@ pub mod cdc_kafka;
 pub mod cdc_slots;
 /// ADR 0028 Phase 2 — per-project CDC webhook subscriptions + delivery cursor.
 pub mod cdc_webhooks;
+/// Create-if-absent emulation for object stores without conditional PUTs
+/// (Backblaze B2).
+pub mod conditional_put;
 mod domains;
 mod enums;
 mod functions;
@@ -90,6 +93,9 @@ pub use cdc_slots::{
 pub use cdc_webhooks::{
     validate_registration as validate_cdc_webhook, CdcWebhookDef, CdcWebhookError, CdcWebhookRow,
     CdcWebhookState,
+};
+pub use conditional_put::{
+    catalog_store, conditional_put_mode, ConditionalPut, CONDITIONAL_PUT_ENV,
 };
 pub use domains::{DomainDef, DomainError, BASIN_DOMAIN_KEY};
 pub use enums::{EnumError, EnumTypeDef, BASIN_ENUM_TYPE_KEY};
